@@ -36,4 +36,4 @@ class ModelTests(TestCase):
         )
 
         self.assertTrue(superuser.is_superuser)
-        self.assertTrue(superuser.is_stuff)
+        self.assertTrue(superuser.is_staff)
