@@ -74,3 +74,17 @@ class Content(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Post(models.Model):
+    """Main post model"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    post_title = models.CharField(max_length=255)
+    tags = models.ManyToManyField('Tag')
+    contnets = models.ManyToManyField('Content')
+
+    def __str__(self):
+        return f'"{self.post_title}" by {self.user.name}'
