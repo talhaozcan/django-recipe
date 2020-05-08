@@ -6,12 +6,21 @@ from core.models import Tag, Content
 from post import serializers
 
 
-class TagViewSet(viewsets.GenericViewSet,
-                 mixins.ListModelMixin,
-                 mixins.CreateModelMixin):
-    """Manage tags in db"""
+class BaseViewSet(viewsets.GenericViewSet,
+                  mixins.ListModelMixin,
+                  mixins.CreateModelMixin):
+    """Base viewset"""
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        """Create new object"""
+        serializer.save(user=self.request.user)
+
+
+class TagViewSet(BaseViewSet):
+    """Manage tags in db"""
+
     queryset = Tag.objects.all()
     serializer_class = serializers.TagSerializer
 
@@ -19,24 +28,12 @@ class TagViewSet(viewsets.GenericViewSet,
         """Get tags for authenticated user's only"""
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
-    def perform_create(self, serializer):
-        """Create new Tag"""
-        serializer.save(user=self.request.user)
 
-
-class ContentViewSet(viewsets.GenericViewSet,
-                     mixins.ListModelMixin,
-                     mixins.CreateModelMixin):
+class ContentViewSet(BaseViewSet):
     """Manage post contents"""
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Content.objects.all()
     serializer_class = serializers.ContentSerializer
 
     def get_queryset(self):
         """Get tags for authenticated user's only"""
         return self.queryset.filter(user=self.request.user).order_by('-title')
-
-    def perform_create(self, serializer):
-        """Create new Tag"""
-        serializer.save(user=self.request.user)

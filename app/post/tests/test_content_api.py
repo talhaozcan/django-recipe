@@ -91,7 +91,6 @@ class PrivateContentApiTests(TestCase):
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['title'], content1.title)
 
-
     def test_create_content_successful(self):
         """Test creating a content successfully"""
 
