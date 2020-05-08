@@ -45,11 +45,11 @@ class PrivateTagsApiTests(TestCase):
         Tag.objects.create(user=self.user, name='TestTag2')
 
         tags = Tag.objects.all().order_by('-name')
-        res = self.client.get(TAGS_URL)
         serializer = TagSerializer(tags, many=True)
 
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        res = self.client.get(TAGS_URL)
 
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
     def test_retrieve_tags_limited_to_user(self):

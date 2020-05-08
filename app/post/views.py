@@ -2,7 +2,7 @@ from rest_framework import viewsets, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import Tag
+from core.models import Tag, Content
 from post import serializers
 
 
@@ -18,6 +18,24 @@ class TagViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         """Get tags for authenticated user's only"""
         return self.queryset.filter(user=self.request.user).order_by('-name')
+
+    def perform_create(self, serializer):
+        """Create new Tag"""
+        serializer.save(user=self.request.user)
+
+
+class ContentViewSet(viewsets.GenericViewSet,
+                     mixins.ListModelMixin,
+                     mixins.CreateModelMixin):
+    """Manage post contents"""
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Content.objects.all()
+    serializer_class = serializers.ContentSerializer
+
+    def get_queryset(self):
+        """Get tags for authenticated user's only"""
+        return self.queryset.filter(user=self.request.user).order_by('-title')
 
     def perform_create(self, serializer):
         """Create new Tag"""

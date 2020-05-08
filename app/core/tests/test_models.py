@@ -55,3 +55,23 @@ class TagModelTests(TestCase):
             name='sampleTagName',
         )
         self.assertEqual(tag.name, str(tag))
+
+
+class ContentTests(TestCase):
+
+    def test_content_str(self):
+        """Test the tag string representation"""
+
+        title = 'Test Title'
+        text = """
+        Post Content
+
+        Bla bla bla
+        """
+
+        content = models.Content.objects.create(
+            user=create_sample_user(),
+            title=title,
+            text=text
+        )
+        self.assertEqual(title, str(content))
