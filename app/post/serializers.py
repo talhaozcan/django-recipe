@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.models import Tag, Content
+from core.models import Tag, Content, Post
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -18,4 +18,23 @@ class ContentSerializer(serializers.ModelSerializer):
     class Meta():
         model = Content
         fields = ('id', 'title', 'text',)
+        read_only_fields = ('id',)
+
+
+class PostSerializer(serializers.ModelSerializer):
+    """Serializer for post"""
+
+    contents = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Content.objects.all()
+    )
+
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all()
+    )
+
+    class Meta():
+        model = Post
+        fields = ('id', 'post_title', 'contents', 'tags')
         read_only_fields = ('id',)

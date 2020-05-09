@@ -84,7 +84,7 @@ class Post(models.Model):
     )
     post_title = models.CharField(max_length=255)
     tags = models.ManyToManyField('Tag')
-    contnets = models.ManyToManyField('Content')
+    contents = models.ManyToManyField('Content')
 
     def __str__(self):
         return f'"{self.post_title}" by {self.user.name}'
