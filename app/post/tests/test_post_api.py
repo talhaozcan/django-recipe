@@ -107,3 +107,52 @@ class PrivatePostTests(TestCase):
 
         serializer = PostDetailSerializer(post)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_post(self):
+        """Test creating a basic post"""
+        params = {
+            'post_title': 'Basic Title'
+        }
+
+        res = self.client.post(POST_URL, params)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        post = Post.objects.get(id=res.data['id'])
+        self.assertEqual(post.post_title, params['post_title'])
+
+    def test_create_post_with_tags(self):
+        """Test creating a post with tags"""
+
+        tag1 = create_tag(user=self.user)
+        tag2 = create_tag(user=self.user, name='tag2')
+
+        params = {
+            'post_title': 'Post with tags',
+            'tags': [tag1.id, tag2.id]
+        }
+
+        res = self.client.post(POST_URL, params)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        post = Post.objects.get(id=res.data['id'])
+        self.assertEqual(post.post_title, params['post_title'])
+        self.assertListEqual(
+            [t.id for t in post.tags.all()], res.data['tags'])
+
+    def test_create_post_with_content(self):
+        """Test creating a post with content"""
+
+        content1 = create_content(user=self.user)
+
+        params = {
+            'post_title': 'Post with tags',
+            'contents': [content1.id]
+        }
+
+        res = self.client.post(POST_URL, params)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        post = Post.objects.get(id=res.data['id'])
+        self.assertEqual(post.post_title, params['post_title'])
+        self.assertListEqual(
+            [c.id for c in post.contents.all()], res.data['contents'])
