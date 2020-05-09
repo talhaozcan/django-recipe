@@ -50,3 +50,9 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Get posts for authenticated user's only"""
         return self.queryset.filter(user=self.request.user).order_by('-id')
+
+    def get_serializer_class(self):
+        """Return appropriate serializer class"""
+        if self.action == 'retrieve':
+            return serializers.PostDetailSerializer
+        return self.serializer_class
