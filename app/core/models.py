@@ -9,6 +9,16 @@ from django.conf import settings
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
+import uuid
+import os
+
+
+def file_path(instance, filename):
+    """generate file path for uploaded files"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return os.path.join('uploads/post/', filename)
+
 
 class UserManager(BaseUserManager):
 
@@ -85,6 +95,7 @@ class Post(models.Model):
     post_title = models.CharField(max_length=255)
     tags = models.ManyToManyField('Tag')
     contents = models.ManyToManyField('Content')
+    image = models.ImageField(null=True, upload_to=file_path)
 
     def __str__(self):
         return f'"{self.post_title}" by {self.user.name}'

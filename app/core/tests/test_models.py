@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -91,3 +92,14 @@ class PostModelTests(TestCase):
         )
         str_post = f'"{post_title}" by {user.name}'
         self.assertEqual(str_post, str(post))
+
+    @patch('uuid.uuid4')
+    def test_post_filename_uuid(self, uuid4):
+        """Test media is saved in correct location"""
+        uuid = 'test-uuid'
+        uuid4.return_value = uuid
+
+        file_path = models.file_path(None, 'image.jpg')
+
+        expected_path = f'uploads/post/{uuid}.jpg'
+        self.assertEqual(file_path, expected_path)
