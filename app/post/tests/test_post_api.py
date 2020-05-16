@@ -2,6 +2,10 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
+import tempfile
+import os
+from PIL import Image
+
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -26,6 +30,11 @@ def create_tag(user, name='Sample Tag'):
 def create_content(user, title='Sample Content', text=''):
     """create sample content"""
     return Content.objects.create(user=user, title=title, text=text)
+
+
+def image_upload_url(post_id):
+    """return url for image upload"""
+    return reverse('post:post-upload-image', args=[post_id])
 
 
 def create_post(user, **params):
@@ -156,3 +165,50 @@ class PrivatePostTests(TestCase):
         self.assertEqual(post.post_title, params['post_title'])
         self.assertListEqual(
             [c.id for c in post.contents.all()], res.data['contents'])
+
+
+class PostImageUploadTests(TestCase):
+
+    def setUp(self):
+        params = {
+            'email': 'test@email.com',
+            'password': 'demo1234',
+            'name': 'Test User'
+        }
+        self.user = get_user_model().objects.create_user(**params)
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        self.post = create_post(user=self.user)
+
+    def tearDown(self):
+        self.post.image.delete()
+
+    def test_upload_image(self):
+        """Test uploading image for a post"""
+        url = image_upload_url(self.post.id)
+
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as temp:
+            img = Image.new('RGB', (10, 10))
+            img.save(temp, format='JPEG')
+            temp.seek(0)
+
+            res = self.client.post(
+                url,
+                {'image': temp},
+                format='multipart'
+            )
+        self.post.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('image', res.data)
+        self.assertTrue(os.path.exists(self.post.image.path))
+
+    def test_upload_image_invalid(self):
+        """Test invalid image saving"""
+        url = image_upload_url(self.post.id)
+        res = self.client.post(
+            url,
+            {'image': 'invalidImage'},
+            format='multipart'
+        )
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
